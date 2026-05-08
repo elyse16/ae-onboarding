@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script type="application/json" id="cowork-artifact-meta">
+{
+  "name": "Sales Onboarding Hub",
+  "schemaVersion": 1,
+  "description": "Sales onboarding dashboard with five tabs: (1) day-by-day program schedule for weeks 1-4, (2) live reference data (subscriber counts, sponsors, placement types, ICP, tool stack), (3) async doc resources with links and placeholders, (4) hands-on exercise materials, (5) SME roster by domain. Data sourced from Metabase and Sponsy as of April 2026."
+}
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Onboarding Hub — TLDR</title>
+<style>
+:root { color-scheme: light; }
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f8f9fb; color: #1a1a2e; padding: 20px; line-height: 1.5;
+}
+
+/* Header */
+.header { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #eee; }
+.logo { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.logo .accent { color: #d513eb; }
+
+/* Tabs */
+.tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 2px solid #eee; overflow-x: auto; }
+.tab {
+  padding: 10px 16px; cursor: pointer; font-weight: 600; font-size: 13px;
+  color: #666; border-bottom: 2px solid transparent; margin-bottom: -2px;
+  transition: all 0.2s; background: none; border-top: none; border-left: none;
+  border-right: none; white-space: nowrap;
+}
+.tab:hover { color: #d513eb; }
+.tab.active { color: #d513eb; border-bottom-color: #d513eb; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Cards */
+.card {
+  background: #fff; border: 1px solid #e8e8ee; border-radius: 12px;
+  padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.card-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f4; }
+.card-title .accent { color: #d513eb; }
+
+/* Week cards */
+.week-header {
+  display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer; margin-bottom: 12px;
+}
+.week-title { font-size: 16px; font-weight: 700; }
+.week-title .num { color: #d513eb; }
+.week-goal { font-size: 13px; color: #666; font-style: italic; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f4; }
+.chevron { font-size: 18px; color: #999; transition: transform 0.2s; }
+.card.collapsed .chevron { transform: rotate(-90deg); }
+.card.collapsed .week-body, .card.collapsed .week-goal { display: none; }
+
+/* Schedule table */
+.sched-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.sched-table th {
+  text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: #999; padding: 8px 10px; border-bottom: 2px solid #eee;
+}
+.sched-table td { padding: 10px 10px; border-bottom: 1px solid #f0f0f4; vertical-align: top; }
+.sched-table tr:last-child td { border-bottom: none; }
+.sched-table .day { font-weight: 700; color: #d513eb; white-space: nowrap; width: 50px; }
+.sched-table .session-name { font-weight: 600; }
+.sched-table .session-desc { color: #555; margin-top: 2px; }
+.sched-table .lead { color: #666; white-space: nowrap; }
+
+/* Format tags */
+.fmt {
+  display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 6px;
+  border-radius: 4px; margin-right: 4px; vertical-align: middle;
+}
+.fmt-live { background: #dbeafe; color: #1e40af; }
+.fmt-async { background: #ede9fe; color: #5b21b6; }
+.fmt-handson { background: #fce7f3; color: #9d174d; }
+
+/* Stats bar */
+.stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.stat-card { background: #fff; border: 1px solid #e8e8ee; border-radius: 10px; padding: 14px; text-align: center; }
+.stat-value { font-size: 22px; font-weight: 700; color: #d513eb; }
+.stat-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+/* Newsletter grid */
+.nl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.nl-card { background: #f8f9fb; border: 1px solid #eee; border-radius: 8px; padding: 12px; }
+.nl-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.nl-subs { font-size: 18px; font-weight: 700; color: #d513eb; }
+.nl-freq { font-size: 12px; color: #888; margin-top: 2px; }
+
+/* Sponsors table */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th {
+  text-align: left; font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: #999; padding: 8px 10px; border-bottom: 2px solid #eee;
+}
+.data-table td { padding: 8px 10px; border-bottom: 1px solid #f0f0f4; vertical-align: top; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table .clicks { font-weight: 600; color: #d513eb; }
+
+/* Placement types */
+.placement-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.placement-card { background: #f8f9fb; border: 1px solid #eee; border-radius: 8px; padding: 14px; text-align: center; }
+.placement-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.placement-desc { font-size: 12px; color: #666; }
+
+/* ICP & grid boxes */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.box { background: #f8f9fb; border-radius: 8px; padding: 14px; }
+.box-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #999; margin-bottom: 6px; }
+.box-content { font-size: 13px; line-height: 1.7; }
+
+/* Tool grid */
+.tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.tool-card { background: #f8f9fb; border: 1px solid #eee; border-radius: 8px; padding: 14px; }
+.tool-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.tool-purpose { font-size: 13px; color: #666; line-height: 1.5; }
+
+/* Freshness */
+.freshness { font-size: 11px; color: #999; text-align: right; margin-top: 8px; font-style: italic; }
+
+/* Resource list */
+.resource-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 14px; border-bottom: 1px solid #f0f0f4;
+}
+.resource-item:last-child { border-bottom: none; }
+.resource-name { font-size: 14px; font-weight: 600; }
+.resource-status { font-size: 12px; }
+.resource-link {
+  display: inline-block; font-size: 12px; font-weight: 600; color: #d513eb;
+  text-decoration: none; padding: 4px 10px; border: 1px solid #d513eb;
+  border-radius: 6px; transition: all 0.2s;
+}
+.resource-link:hover { background: #d513eb; color: #fff; }
+.resource-placeholder {
+  display: inline-block; font-size: 11px; font-weight: 600; color: #999;
+  padding: 4px 10px; border: 1px dashed #ccc; border-radius: 6px;
+}
+.resource-owner { font-size: 12px; color: #888; margin-top: 2px; }
+
+/* Placeholder banner */
+.placeholder-banner {
+  background: #fef3c7; border: 1px dashed #f59e0b; border-radius: 8px;
+  padding: 12px 16px; font-size: 13px; color: #92400e; margin-bottom: 14px;
+}
+.placeholder-banner strong { font-weight: 700; }
+
+/* Exercise cards */
+.exercise-card { margin-bottom: 12px; }
+.exercise-week { font-size: 11px; font-weight: 600; color: #d513eb; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.exercise-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.exercise-desc { font-size: 13px; color: #555; line-height: 1.6; margin-bottom: 10px; }
+.exercise-placeholder {
+  background: #f8f9fb; border: 1px dashed #ccc; border-radius: 8px;
+  padding: 14px; font-size: 13px; color: #999; font-style: italic;
+}
+
+/* SME cards */
+.sme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.sme-card { background: #f8f9fb; border: 1px solid #eee; border-radius: 10px; padding: 16px; }
+.sme-domain { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #d513eb; margin-bottom: 4px; }
+.sme-name { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.sme-links { margin-top: 8px; }
+.sme-links a { font-size: 12px; font-weight: 600; color: #d513eb; text-decoration: none; margin-right: 12px; }
+.sme-links a:hover { text-decoration: underline; }
+.sme-content { font-size: 12px; font-weight: 600; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+.sme-topics { font-size: 13px; color: #555; line-height: 1.6; }
+.sme-topic-item { padding: 2px 0; }
+
+/* Section divider */
+.section-divider { margin: 20px 0 16px; padding-top: 16px; border-top: 1px solid #eee; }
+.section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #999; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">TLDR<span class="accent">×</span>Sales Onboarding Hub</div>
+</div>
+
+<div class="tabs">
+  <button type="button" class="tab active" onclick="switchTab('program', this)">Program Schedule</button>
+  <button type="button" class="tab" onclick="switchTab('reference', this)">TLDR at a Glance</button>
+  <button type="button" class="tab" onclick="switchTab('resources', this)">Resources</button>
+  <button type="button" class="tab" onclick="switchTab('exercises', this)">Exercises</button>
+  <button type="button" class="tab" onclick="switchTab('smes', this)">Subject Matter Experts</button>
+</div>
+
+<!-- ==================== PROGRAM SCHEDULE ==================== -->
+<div id="program" class="tab-content active">
+
+  <div style="font-size:13px;color:#555;margin-bottom:14px;padding:14px 16px;background:#fff;border-radius:8px;border:1px solid #e8e8ee;line-height:1.7;">
+    Below is your week-by-week schedule for your first four weeks — every session, exercise, and check-in mapped out. Week 1 builds the foundation (TLDR, the audience, the pitch). Week 2 is bootcamp on the tools and systems. Week 3 is pitch prep — teach-back, reverse demo, and shadowing live calls. Week 4 you activate your book of business and run your first solo call. Pair this with your Role Expectations Slack canvas, which covers your role definition, 30/60/90 plan, deliverables, and success criteria — that's the <em>what</em>. This is the <em>how</em>: what you'll actually be doing day-to-day to get there.
+    <br><br>
+    <span style="color:#999;">This schedule is subject to change. All live sessions are pre-scheduled on your calendar. You may also see additional 1:1s added to your calendar with folks relevant to your specific role.</span>
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;padding:10px 14px;background:#fff;border-radius:8px;border:1px solid #e8e8ee;font-size:12px;color:#666;">
+    <span><span class="fmt fmt-live">LIVE</span> Live session</span>
+    <span><span class="fmt fmt-async">ASYNC</span> Self-paced</span>
+    <span><span class="fmt fmt-handson">HANDS-ON</span> Exercise</span>
+  </div>
+
+  <!-- WEEK 1 -->
+  <div class="card" onclick="toggleWeek(this, event)">
+    <div class="week-header">
+      <div class="week-title"><span class="num">Week 1</span> — Revenue Team Foundations</div>
+      <div class="chevron">&#9662;</div>
+    </div>
+    <div class="week-goal">Goal: Understand TLDR's business, audience, and value prop.</div>
+    <div class="week-body">
+      <table class="sched-table">
+        <thead><tr><th>Day</th><th>Session</th><th>Format</th><th>Lead</th></tr></thead>
+        <tbody>
+          <tr><td class="day">Mon</td><td><div class="session-name">Day 1 orientation</div><div class="session-desc">Company orientation, mission, key people, benefits</div></td><td><span class="fmt fmt-live">LIVE</span></td><td class="lead">Elyse</td></tr>
+          <tr><td class="day">Mon</td><td><div class="session-name">Manager welcome</div><div class="session-desc">Welcome, intro, expectations</div></td><td><span class="fmt fmt-live">LIVE</span></td><td class="lead">Manager</td></tr>
+          <tr><td class="day">Mon</td><td><div class="session-name">Buddy intro coffee</div><div class="session-desc">Break the ice, get to know each other, welcome to TLDR</div></td><td><span class="fmt fmt-live">LIVE</span></td><td class="lead">Buddy</td></tr>
+          <tr><td class="day">Tue</td><td><div class="session-name">Revenue team overview</div><div class="session-desc">How the revenue team is structured, key metrics, current focus</div></td><td><span class="fmt fmt-live">LIVE</span> 1 hr</td><td class="lead">Val</td></tr>
+          <tr><td class="day">Mon–Fri</td><td><div class="session-name">Self-study: Resources tab</div><div class="session-desc">Work through the Resources tab on your own time throughout the week. This is how you'll get to know TLDR, the business model, our audience, the sales motion, and the tools you'll be using every day.</div></td><td><span class="fmt fmt-async">ASYNC</span></td><td class="lead">Self-paced</td></tr>
+          <tr><td class="day">Wed</td><td><div class="session-name">Audience &amp; portfolio SME</div><div class="session-desc">Which newsletter for which advertiser, vertical performance, ICP per newsletter</div></td><td><span class="fmt fmt-async">ASYNC</span> <span class="fmt fmt-live">LIVE</span></td><td class="lead">Pri</td></tr>
+          <tr><td class="day">Thu</td><td><div class="session-name">Curated call library</div><div class="session-desc">Watch curated list of Attention recordings. See Exercises tab.</div></td><td><span class="fmt fmt-handson">HANDS-ON</span></td><td class="lead">Self-paced</td></tr>
+          <tr><td class="day">Fri</td><td><div class="session-name">Sales motion SME</div><div class="session-desc">Pitch, value prop, discovery, objections, proposal</div></td><td><span class="fmt fmt-async">ASYNC</span> <span class="fmt fmt-live">LIVE</span></td><td class="lead">Marpo</td></tr>
+          <tr><td class="day">Fri</td><td><div class="session-name">Win/loss autopsies</div><div class="session-desc">Read 1 closed-won + 1 closed-lost summary. See Exercises tab.</div></td><td><span class="fmt fmt-handson">HANDS-ON</span></td><td class="lead">Self-paced</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- WEEK 2 -->
+  <div class="card" onclick="toggleWeek(this, event)">
+    <div class="week-header">
+      <div class="week-title"><span class="num">Week 2</span> — Sales Bootcamp</div>
+      <div class="chevron">&#9662;</div>
+    </div>
+    <div class="week-goal">Goal: Build tool fluency through doing, not watching.</div>
+    <div class="week-body">
+      <table class="sched-table">
+        <thead><tr><th>Day</th><th>Session</th><th>Format</th><th>Lead</th></tr></thead>
+        <tbody>
+          <tr><td class="day">Mon</td><td><div class="session-name">HubSpot SME</div><div class="session-desc">Pipeline, deal creation, activity logging, common mistakes</div></td><td><span class="fmt fmt-async">ASYNC</span> <span class="fmt fmt-live">LIVE</span></td><td class="lead">Riley</td></tr>
+          <tr><td class="day">Tue</td><td><div class="session-name">Sponsy SME</div><div class="session-desc">Inventory, availability, booking, IO, billing contact match</div></td><td><span class="fmt fmt-async">ASYNC</span> <span class="fmt fmt-live">LIVE</span></td><td class="lead">Tyler</td></tr>
+          <tr><td class="day">Tue</td><td><div class="session-name">Full deal cycle SME</div><div class="session-desc">End-to-end: first touch → IO → billing → handoff</div></td><td><span class="fmt fmt-async">ASYNC</span> <span class="fmt fmt-live">LIVE</span></td><td class="lead">Stef / Laura</td></tr>
+          <tr><td class="day">Wed</td><td><div class="session-name">Cowork setup + verification</div><div class="session-desc">Install, plugins, slash commands — verified live</div></td><td><span class="fmt fmt-live">LIVE</span> 45 min</td><td class="lead">Upashruti</td></tr>
+          <tr><td class="day">Thu</td><td><div class="session-name">First deal scavenger hunt + Objection handling</div><div class="session-desc">10-step checklist simulating a real deal setup (with buddy). Top 8-10 objections role-play. See Exercises tab.</div></td><td><span class="fmt fmt-handson">HANDS-ON</span></td><td class="lead">Buddy</td></tr>
+          <tr><td class="day">Fri</td><td><div class="session-name">Amplemarket SME</div><div class="session-desc">Sequences, enrichment, account research</div></td><td><span class="fmt fmt-live">LIVE</span></td><td class="lead">Alan</td></tr>
+          <tr><td class="day">Fri</td><td><div class="session-name">RevenueHero</div><div class="session-desc">What it is, how we use it</div></td><td><span class="fmt fmt-async">ASYNC</span></td><td class="lead">Jiali</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- WEEK 3 -->
+  <div class="card" onclick="toggleWeek(this, event)">
+    <div class="week-header">
+      <div class="week-title"><span class="num">Week 3</span> — Pitch Prep + Shadowing</div>
+      <div class="chevron">&#9662;</div>
+    </div>
+    <div class="week-goal">Goal: Prove you can pitch. Pass the teach-back gate. Shadow live calls.</div>
+    <div class="week-body">
+      <table class="sched-table">
+        <thead><tr><th>Day</th><th>Session</th><th>Format</th><th>Lead</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="day">Mon</td>
+            <td><div class="session-name">Pre-call research on real account</div><div class="session-desc">Research a real prospect using Cowork + ad libraries. See Exercises tab.</div></td>
+            <td><span class="fmt fmt-handson">HANDS-ON</span></td>
+            <td class="lead">Self-paced</td>
+          </tr>
+          <tr>
+            <td class="day">Tue</td>
+            <td><div class="session-name">Teach-back preparation</div><div class="session-desc">Practice run with buddy before the official presentation</div></td>
+            <td><span class="fmt fmt-live">LIVE</span></td>
+            <td class="lead">Buddy</td>
+          </tr>
+          <tr>
+            <td class="day">Wed</td>
+            <td><div class="session-name">Teach-back presentation</div><div class="session-desc">Pitch TLDR's value prop to manager. Must pass to move to live calls.</div></td>
+            <td><span class="fmt fmt-live">LIVE</span> 30 min</td>
+            <td class="lead">Manager</td>
+          </tr>
+          <tr>
+            <td class="day">Thu</td>
+            <td><div class="session-name">Reverse demo — 2 personas</div><div class="session-desc">New hire demos TLDR ad products. Manager + 1-2 senior AEs play buyer personas.</div></td>
+            <td><span class="fmt fmt-live">LIVE</span> 30 min</td>
+            <td class="lead">Manager + AEs</td>
+          </tr>
+          <tr>
+            <td class="day">Thu–Fri</td>
+            <td><div class="session-name">Shadow 3–5 live calls</div><div class="session-desc">Shadow different AEs to see pitch variety. Take notes.</div></td>
+            <td><span class="fmt fmt-handson">HANDS-ON</span></td>
+            <td class="lead">Self-paced</td>
+          </tr>
+          <tr>
+            <td class="day">Fri</td>
+            <td><div class="session-name">Lead management + prospecting</div><div class="session-desc">Setting up sequences, working leads</div></td>
+            <td><span class="fmt fmt-async">ASYNC</span></td>
+            <td class="lead">Amplemarket SME</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- WEEK 4 -->
+  <div class="card" onclick="toggleWeek(this, event)">
+    <div class="week-header">
+      <div class="week-title"><span class="num">Week 4</span> — BoB Activation</div>
+      <div class="chevron">&#9662;</div>
+    </div>
+    <div class="week-goal">Goal: Activate your book of business. Transition to ongoing cadence.</div>
+    <div class="week-body">
+      <table class="sched-table">
+        <thead><tr><th>Day</th><th>Session</th><th>Format</th><th>Lead</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="day">Mon</td>
+            <td><div class="session-name">Account review with buddy</div><div class="session-desc">Walk through assigned book of business using account planning template</div></td>
+            <td><span class="fmt fmt-live">LIVE</span></td>
+            <td class="lead">Buddy</td>
+          </tr>
+          <tr>
+            <td class="day">Tue</td>
+            <td><div class="session-name">First outbound sequences</div><div class="session-desc">Set up first sequences to assigned accounts</div></td>
+            <td><span class="fmt fmt-handson">HANDS-ON</span></td>
+            <td class="lead">Self-paced</td>
+          </tr>
+          <tr>
+            <td class="day">Wed</td>
+            <td><div class="session-name">First solo call + debrief</div><div class="session-desc">First unsupervised call. Buddy shadows. 15-min debrief after.</div></td>
+            <td><span class="fmt fmt-live">LIVE</span></td>
+            <td class="lead">Buddy</td>
+          </tr>
+          <tr>
+            <td class="day">Thu</td>
+            <td><div class="session-name">Self-review</div><div class="session-desc">Watch own teach-back recording, score self, identify 3 improvement areas. See Exercises tab.</div></td>
+            <td><span class="fmt fmt-handson">HANDS-ON</span></td>
+            <td class="lead">Self-paced</td>
+          </tr>
+          <tr>
+            <td class="day">Fri</td>
+            <td><div class="session-name">Wrap-up with buddy</div><div class="session-desc">Celebrate progress, transition to peer cadence</div></td>
+            <td><span class="fmt fmt-live">LIVE</span></td>
+            <td class="lead">Buddy</td>
+          </tr>
+          <tr>
+            <td class="day">Anytime</td>
+            <td><div class="session-name">Post-sales overview</div><div class="session-desc">What happens after a deal closes: AdOps + AM handoff</div></td>
+            <td><span class="fmt fmt-async">ASYNC</span></td>
+            <td class="lead">Tyler</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== REFERENCE DATA ==================== -->
+<div id="reference" class="tab-content">
+
+  <div class="stats-bar">
+    <div class="stat-card"><div class="stat-value">6.7M+</div><div class="stat-label">Total Subscribers</div></div>
+    <div class="stat-card"><div class="stat-value">12</div><div class="stat-label">Newsletters</div></div>
+    <div class="stat-card"><div class="stat-value">40–46%</div><div class="stat-label">Avg Open Rate</div></div>
+    <div class="stat-card"><div class="stat-value">40%</div><div class="stat-label">Executive Readers</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Newsletter <span class="accent">Portfolio</span></div>
+    <div class="nl-grid">
+      <div class="nl-card"><div class="nl-name">TLDR</div><div class="nl-subs">1.55M</div><div class="nl-freq">Mon–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR AI</div><div class="nl-subs">1.04M</div><div class="nl-freq">Mon–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR Data</div><div class="nl-subs">544K</div><div class="nl-freq">Schedule varies</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR Web Dev</div><div class="nl-subs">460K</div><div class="nl-freq">Mon–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR Fintech</div><div class="nl-subs">439K</div><div class="nl-freq">Schedule varies</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR Product</div><div class="nl-subs">419K</div><div class="nl-freq">Tue–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR InfoSec</div><div class="nl-subs">410K</div><div class="nl-freq">Mon–Wed–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR Founders</div><div class="nl-subs">377K</div><div class="nl-freq">Mon–Wed–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR DevOps</div><div class="nl-subs">345K</div><div class="nl-freq">Mon–Wed–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR Marketing</div><div class="nl-subs">313K</div><div class="nl-freq">Mon–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR Design</div><div class="nl-subs">312K</div><div class="nl-freq">Mon–Fri</div></div>
+      <div class="nl-card"><div class="nl-name">TLDR Crypto</div><div class="nl-subs">300K</div><div class="nl-freq">Mon–Fri</div></div>
+    </div>
+    <div class="freshness">Subscriber counts from Metabase — April 21, 2026</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Placement <span class="accent">Types</span></div>
+    <div class="placement-grid">
+      <div class="placement-card"><div class="placement-name">Primary</div><div class="placement-desc">Top placement. Longest copy, company logo, prominent CTA link. Highest visibility and click volume.</div></div>
+      <div class="placement-card"><div class="placement-name">Secondary</div><div class="placement-desc">Mid-newsletter placement. Shorter copy, company logo, CTA link. Strong engagement at lower price point.</div></div>
+      <div class="placement-card"><div class="placement-name">Quick Link</div><div class="placement-desc">Brief one-line text link in the quick links section. Lowest cost, good for brand awareness and retargeting.</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Tool <span class="accent">Stack</span></div>
+    <div class="tool-grid">
+      <div class="tool-card"><div class="tool-name">HubSpot</div><div class="tool-purpose">CRM — deals, pipeline stages, contacts, companies, engagement history, forecasting, rate cards.</div></div>
+      <div class="tool-card"><div class="tool-name">Sponsy</div><div class="tool-purpose">Ad inventory — placement availability, bookings, campaign data, click performance, IOs.</div></div>
+      <div class="tool-card"><div class="tool-name">Metabase</div><div class="tool-purpose">Subscriber analytics — audience counts, open/click rates, demographics, engagement trends.</div></div>
+      <div class="tool-card"><div class="tool-name">Attention</div><div class="tool-purpose">Call intelligence — meeting transcripts, follow-up drafts, scorecard results, call prep.</div></div>
+      <div class="tool-card"><div class="tool-name">Cowork / Claude</div><div class="tool-purpose">AI assistant — account research, proposal generation, call prep, competitor analysis, morning briefs.</div></div>
+      <div class="tool-card"><div class="tool-name">Amplemarket</div><div class="tool-purpose">Outbound — lead and company enrichment, contact discovery, outbound sequences.</div></div>
+      <div class="tool-card"><div class="tool-name">RevenueHero</div><div class="tool-purpose">Inbound routing and scheduling — lead distribution to AEs.</div></div>
+      <div class="tool-card"><div class="tool-name">Google Workspace</div><div class="tool-purpose">Docs, Sheets, Slides, Calendar — shared documents, proposal templates, meeting scheduling.</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Top Sponsors <span class="accent">(Last 90 Days)</span></div>
+    <table class="data-table">
+      <thead><tr><th>Company</th><th>Placements</th><th>Total Clicks</th></tr></thead>
+      <tbody>
+        <tr><td>QA Wolf</td><td>57</td><td class="clicks">75,338</td></tr>
+        <tr><td>Wispr</td><td>60</td><td class="clicks">60,982</td></tr>
+        <tr><td>WorkOS</td><td>26</td><td class="clicks">33,871</td></tr>
+        <tr><td>Metronome</td><td>42</td><td class="clicks">24,991</td></tr>
+        <tr><td>Unblocked</td><td>27</td><td class="clicks">21,103</td></tr>
+        <tr><td>Framer</td><td>31</td><td class="clicks">15,179</td></tr>
+        <tr><td>Clerk</td><td>36</td><td class="clicks">15,352</td></tr>
+        <tr><td>Atlassian</td><td>39</td><td class="clicks">11,057</td></tr>
+        <tr><td>Amazon Web Services (AWS)</td><td>36</td><td class="clicks">9,151</td></tr>
+        <tr><td>Asana</td><td>56</td><td class="clicks">8,631</td></tr>
+        <tr><td>Microsoft Azure</td><td>37</td><td class="clicks">6,776</td></tr>
+        <tr><td>Google</td><td>44</td><td class="clicks">4,699</td></tr>
+        <tr><td>Sentry</td><td>42</td><td class="clicks">3,923</td></tr>
+      </tbody>
+    </table>
+    <div class="freshness">From Sponsy — last 90 days as of April 21, 2026</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Operating <span class="accent">Rhythm</span></div>
+    <table class="data-table">
+      <thead><tr><th>Cadence</th><th>What</th><th>Details</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Weekly (Mon)</strong></td><td>TLDR Squared</td><td>Async team update every Monday in #team-full-time. The TLDR of TLDR. What's going on around the company.</td></tr>
+        <tr><td><strong>Weekly (Wed)</strong></td><td>Wednesday Drop</td><td>Async team update every Wednesday in #team-full-time. Updates on process or policy changes in one central place.</td></tr>
+        <tr><td><strong>Weekly / Bi-weekly</strong></td><td>Manager 1:1</td><td>Standing check-in with your manager. Covers pipeline, deals, coaching, and development.</td></tr>
+        <tr><td><strong>Bi-weekly</strong></td><td>Revenue Lab</td><td>Team learning session. Rotating topics: pitch teardowns, deal reviews, competitive intel, new product features, guest speakers. Recordings available in Resources tab.</td></tr>
+        <tr><td><strong>2x / quarter</strong></td><td>Revenue All-Hands</td><td>Full revenue team meeting. Pipeline review, quota progress, strategic updates, cross-functional alignment between AEs, AMs, and ops.</td></tr>
+        <tr><td><strong>2x / quarter</strong></td><td>Company All-Hands</td><td>Full TLDR team meeting. Company performance, product updates, culture, and cross-team visibility.</td></tr>
+        <tr><td><strong>2x / year</strong></td><td>Team Offsites</td><td>In-person team gatherings. Strategy, planning, relationship-building, and resetting for the next half.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ==================== RESOURCES ==================== -->
+<div id="resources" class="tab-content">
+
+  <div class="card">
+    <div class="card-title">Ready <span class="accent">Resources</span></div>
+    <!-- THE BUSINESS -->
+    <div class="resource-item"><div><div class="resource-name">TLDR Business Model Overview</div><div class="resource-owner">What TLDR is, how we make money, who reads us, who sponsors us</div></div><a class="resource-link" href="https://docs.google.com/document/d/1FZB3jNrKawfCzGCEod8mO3TQYVgmdJ08IhLuVMabKPo/edit?tab=t.0#heading=h.5rcr0nwcevdn" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">TLDR ICP</div><div class="resource-owner">Ideal customer profile, contact personas, ICP by newsletter vertical, reference accounts</div></div><a class="resource-link" href="https://docs.google.com/document/d/1h3a_h0s_195ih9anV3oTmoET1e29La3ukeusDXDk_GY/edit?tab=t.0" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">GTM Handbook</div><div class="resource-owner">Official source of truth for GTM operations</div></div><a class="resource-link" href="https://docs.google.com/document/d/1HmIAsEzYcHSBu83XS11XLdiPPA-qZUyguOurkr4s3qs/edit?usp=sharing" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">Pod R&amp;R Explainer</div><div class="resource-owner">AE / AM pod roles and responsibilities</div></div><a class="resource-link" href="https://docs.google.com/document/u/0/d/1YQPBSF8EZgoP1LF1j425NOJ5YKh8JtJajF3gYsP3ZBQ/edit" target="_blank">Open</a></div>
+    <!-- SALES MOTION -->
+    <div class="resource-item"><div><div class="resource-name">Sales FAQ</div><div class="resource-owner">Differentiators, competitors, common prospect questions</div></div><a class="resource-link" href="https://docs.google.com/document/d/1CWg4Qi-g2yyJMZVFQTxAZkTtBfeeCG0JWwIXWrkzl-Q/edit" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">Lifecycle of a Lead</div><div class="resource-owner">How leads flow through the system</div></div><a class="resource-link" href="https://docs.google.com/presentation/d/1rus_s4o5aVMOyHZDQZGFY2GXpsm3URmnGzqwTDSRRJ0/edit?slide=id.g3d319157bdb_2_2#slide=id.g3d319157bdb_2_2" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">Outbound 2.0</div><div class="resource-owner">AE launch playbook for outbound</div></div><a class="resource-link" href="https://docs.google.com/presentation/d/11Ddlft5vP4dBnb_3ecfM5ltYScXQ1t-YlQTE_Mk9WSg/edit?slide=id.p1#slide=id.p1" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">Outbound Playbook</div><div class="resource-owner">Tips for successful signal and non-signal based outbound (email + LinkedIn)</div></div><a class="resource-link" href="https://docs.google.com/document/d/1V4ADc_JVuySQyHJCPu4BnmAFPFjZeqHdbaBn3X3YanU/edit?tab=t.0#heading=h.3guj17wxyevd" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">Multi-threading + AM Transitions</div><div class="resource-owner">How to multi-thread deals and handle AM handoffs</div></div><a class="resource-link" href="https://docs.google.com/presentation/d/11W5OeTokzbDyHZzv2UsENzsSn_zmn0KCK31zqo-hlCk/edit?usp=sharing" target="_blank">Open</a></div>
+    <!-- DISCOVERY + MEASUREMENT -->
+    <div class="resource-item"><div><div class="resource-name">Measurement Discovery + Challenging Last Click</div><div class="resource-owner">How to run measurement discovery and reframe beyond last-click attribution</div></div><a class="resource-link" href="https://docs.google.com/document/d/1RQ7TSNy0lHYJLH7KEJEtw_sksZ33b--orG0tWuifU2c/edit?usp=sharing" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">Measuring Success with Newsletters</div><div class="resource-owner">Framework for evaluating newsletter ad performance</div></div><a class="resource-link" href="https://docs.google.com/presentation/d/1ZUCOgeXVNVeZOsuTeKeme-_S6WudBIWq_2XPW0fYAig/edit?slide=id.p1#slide=id.p1" target="_blank">Open</a></div>
+    <!-- PRODUCT KNOWLEDGE -->
+    <div class="resource-item"><div><div class="resource-name">Flex Placements Guide</div><div class="resource-owner">How flex placements work</div></div><a class="resource-link" href="https://docs.google.com/presentation/u/0/d/1wobBdWvGx7Lkv3iG_q8qJG48lnXHtiy7/edit" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">Creative Best Practices</div><div class="resource-owner">Newsletter advertising best practices for advertisers</div></div><a class="resource-link" href="https://advertise.tldr.tech/newsletter-advertising-best-practices/" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">Case Studies</div><div class="resource-owner">Advertiser success stories</div></div><a class="resource-link" href="https://advertise.tldr.tech/case-studies/" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">Deal Post Mortem</div><div class="resource-owner">Three real deals (net-new win, test-to-expand win, renewal loss) broken down side-by-side</div></div><a class="resource-link" href="https://docs.google.com/document/d/14ltBvysAMZrbV0IMbzNPj7Nm4mXMY1l_7P7Ykw5aUjA/edit?tab=t.0#heading=h.csj8x9yi4ksi" target="_blank">Open</a></div>
+    <!-- TOOLS + RESEARCH -->
+    <div class="resource-item"><div><div class="resource-name">Cowork Sales Setup Checklist</div><div class="resource-owner">Step-by-step setup guide for Cowork and sales tools</div></div><a class="resource-link" href="https://drive.google.com/file/d/1auTEzhkdwC1wqEQqZkL6wSzOvYTB0Els/view?usp=drive_link" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">Appeared.in</div><div class="resource-owner">Ad spend intelligence tool</div></div><a class="resource-link" href="https://docs.google.com/presentation/d/1BdxHYQv8UMs-zwjoI5QUP7-VAs_y-0e_Kb-ym54kMWk/edit?slide=id.p1#slide=id.p1" target="_blank">Open</a></div>
+    <!-- RECORDINGS -->
+    <div class="resource-item"><div><div class="resource-name">Revenue Labs (2026)</div><div class="resource-owner">Revenue team training sessions</div></div><a class="resource-link" href="https://docs.google.com/presentation/d/1bXKz4ZYYvCDL81F8bkeqWLD6U7kNxXBj/edit?slide=id.g3db2ab13d8e_0_0#slide=id.g3db2ab13d8e_0_0" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">Revenue Lab Recording (4/26)</div><div class="resource-owner">Revenue Lab session recording</div></div><a class="resource-link" href="https://drive.google.com/file/d/1plxyVv9YJg51cVDY4P1gLWgC3T9sIAkU/view" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">Revenue Lab Recording (5/2)</div><div class="resource-owner">Revenue Lab session recording</div></div><a class="resource-link" href="https://drive.google.com/file/d/1N3bUrilIBaWuiwvARs-jP5t9H_xhhTq3/view" target="_blank">Open</a></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Needs Refresh or <span class="accent">Build</span></div>
+    <div class="placeholder-banner"><strong>These resources are in progress.</strong> Current versions linked where available. Owners noted for tracking.</div>
+    <div class="resource-item">
+      <div><div class="resource-name">Common Objections</div><div class="resource-owner">Owner: Marpo — Build</div></div>
+      <span class="resource-placeholder">Placeholder</span>
+    </div>
+    <div class="resource-item">
+      <div><div class="resource-name">Lifecycle of a Deal</div><div class="resource-owner">Owner: Marpo — Build</div></div>
+      <span class="resource-placeholder">Placeholder</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== EXERCISES ==================== -->
+<div id="exercises" class="tab-content">
+
+  <div class="placeholder-banner">
+    <strong>Exercises are being built.</strong> Placeholders below show what will live here. Content owners noted for each.
+  </div>
+
+  <div class="card">
+    <div class="exercise-card">
+      <div class="exercise-week">Week 1</div>
+      <div class="exercise-title">Curated Call Library</div>
+      <div class="exercise-desc">Listen to 5–10 tagged Attention recordings across key sales scenarios. Take notes on what stood out.</div>
+      <div class="exercise-placeholder">Placeholder — Val or Marpo to select and tag recordings by scenario (great discovery, tough objection handling, strong close, instructive loss)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="exercise-card">
+      <div class="exercise-week">Week 1</div>
+      <div class="exercise-title">Win/Loss Deal Summaries</div>
+      <div class="exercise-desc">Read 1 closed-won and 1 closed-lost deal summary. Analyze what happened and why.</div>
+      <div class="exercise-placeholder">Done — see <a href="https://docs.google.com/document/d/14ltBvysAMZrbV0IMbzNPj7Nm4mXMY1l_7P7Ykw5aUjA/edit?tab=t.0#heading=h.csj8x9yi4ksi" target="_blank" style="color:#d513eb;">Deal Post Mortem</a> in Resources tab. Three deals: HUMAN (net-new win), New Relic (test-to-expand win), Checkmarx (renewal loss).</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="exercise-card">
+      <div class="exercise-week">Week 2</div>
+      <div class="exercise-title">HubSpot Tool Exercise</div>
+      <div class="exercise-desc">Create a deal end-to-end in HubSpot. Guided scenarios for pipeline stages, activity logging, and reporting.</div>
+      <div class="exercise-placeholder"><a href="https://docs.google.com/document/d/1GuPZvQEndimqfrZx-4eZIAFNwTp2BtilcKg9HY7V92Q/edit" target="_blank" style="color:#d513eb;">AE Onboarding HubSpot Deal Scenarios</a> — Jiali validating with Upashruti, confirming sandbox with Ian</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="exercise-card">
+      <div class="exercise-week">Week 2</div>
+      <div class="exercise-title">First Deal Scavenger Hunt</div>
+      <div class="exercise-desc">10-step checklist simulating a real deal setup across all tools. Complete with buddy on the call.</div>
+      <div class="exercise-placeholder">Placeholder — Elyse to design checklist. Tasks span HubSpot, Sponsy, Metabase, Firecrawl, and Cowork.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="exercise-card">
+      <div class="exercise-week">Week 2</div>
+      <div class="exercise-title">Objection Role-Play</div>
+      <div class="exercise-desc">Top 8–10 objections with on-voice TLDR responses. Role-play with buddy.</div>
+      <div class="exercise-placeholder">Placeholder — Marpo to build objection + response resource. <a href="https://docs.google.com/document/d/1N4wqdWCSQSalKppH1zw5KoJhEXocR5OnZ-qAKuc8ZtM/edit?tab=t.0" target="_blank" style="color:#d513eb;">Existing objection handling doc</a></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="exercise-card">
+      <div class="exercise-week">Week 3</div>
+      <div class="exercise-title">Pre-Call Research on Real Account</div>
+      <div class="exercise-desc">Research a real prospect using Cowork account research, Firecrawl, LinkedIn ad library, and Google ad transparency.</div>
+      <div class="exercise-placeholder">Placeholder — Elyse to build research template by May 4–7</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="exercise-card">
+      <div class="exercise-week">Week 3</div>
+      <div class="exercise-title">Teach-Back Evaluation Rubric</div>
+      <div class="exercise-desc">Scoring rubric for the gated teach-back presentation. Manager evaluates.</div>
+      <div class="exercise-placeholder">Placeholder — Elyse to build rubric by May 4–7. <a href="https://docs.google.com/document/d/1-Iq-SncRcUgzO0Bp7sVt7IZyVRxD0pOqFLVwgVCigNQ/edit?usp=sharing" target="_blank" style="color:#d513eb;">Current shadowing + practice pitching doc</a></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="exercise-card">
+      <div class="exercise-week">Week 3</div>
+      <div class="exercise-title">Reverse Demo — Persona Prompts</div>
+      <div class="exercise-desc">Buyer persona prompts for the reverse demo. Manager + 1–2 senior AEs play personas.</div>
+      <div class="exercise-placeholder">Placeholder — Elyse to build persona prompts by May 4–7. 2 personas, 30 min session.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="exercise-card">
+      <div class="exercise-week">Week 4</div>
+      <div class="exercise-title">Self-Review Template</div>
+      <div class="exercise-desc">Watch back your own teach-back recording. Score yourself and identify 3 specific improvement areas.</div>
+      <div class="exercise-placeholder">Placeholder — Elyse to build. Mirrors teach-back evaluation rubric. (v2 deferral)</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="exercise-card">
+      <div class="exercise-week">Week 4</div>
+      <div class="exercise-title">Self-Review Template</div>
+      <div class="exercise-desc">Watch back your own teach-back recording. Score yourself and identify 3 specific improvement areas.</div>
+      <div class="exercise-placeholder">Placeholder — Elyse to build. Mirrors teach-back evaluation rubric.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="exercise-card">
+      <div class="exercise-week">Bonus</div>
+      <div class="exercise-title">SME Bonus Exercises</div>
+      <div class="exercise-desc">Additional hands-on exercises from individual SMEs for their domains.</div>
+      <div class="exercise-placeholder">
+        <a href="https://docs.google.com/document/d/1Q8vQQQwOrkVYZ78qvUtnEWJg26DeeM7v8mJPHv2B0cs/edit?usp=drive_link" target="_blank" style="color:#d513eb;">Laura — Deal Lifecycle Bonus Exercise (Mid-Market)</a><br>
+        <a href="https://docs.google.com/document/d/1U4KIsqg4ZnUV5uAVU4e6jqhDN2xeHJi56n6ypgF4o8M/edit?usp=drive_link" target="_blank" style="color:#d513eb;">Stef — Deal Lifecycle Bonus Exercise (Enterprise)</a><br><br>
+        <span style="font-style:italic;">More SME exercises to come</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ==================== SUBJECT MATTER EXPERTS ==================== -->
+<div id="smes" class="tab-content">
+
+  <p style="font-size:14px;color:#555;margin-bottom:16px;">Each SME owns a recorded video walkthrough and a live session with the new hire. They're your go-to person for questions in their domain.</p>
+
+  <div class="sme-grid">
+    <div class="sme-card"><div class="sme-domain">HubSpot</div><div class="sme-name">Riley</div><div class="sme-links"><a href="https://drive.google.com/file/d/120Fst-4mmstEv_wSJNSUmTkuhzHJey6F/view" target="_blank">Video</a></div></div>
+    <div class="sme-card"><div class="sme-domain">Sponsy</div><div class="sme-name">Tyler</div><div class="sme-links"><a href="https://drive.google.com/file/d/1MxPjI_C9_SSQAt709x5igqVogpNRqUJH/view?usp=drive_link" target="_blank">Video</a></div></div>
+    <div class="sme-card"><div class="sme-domain">Amplemarket</div><div class="sme-name">Alan</div></div>
+    <div class="sme-card"><div class="sme-domain">RevenueHero</div><div class="sme-name">Jiali</div><div class="sme-links"><a href="https://drive.google.com/file/d/1kV2fXjKiebWpC5c9HQx7cB3ujnr4hgzV/view?usp=drive_link" target="_blank">Video</a></div></div>
+    <div class="sme-card"><div class="sme-domain">Cowork</div><div class="sme-name">Upashruti</div></div>
+    <div class="sme-card"><div class="sme-domain">Audience &amp; Portfolio</div><div class="sme-name">Pri</div></div>
+    <div class="sme-card"><div class="sme-domain">Sales Motion</div><div class="sme-name">Marpo</div></div>
+    <div class="sme-card"><div class="sme-domain">Deal Lifecycle / Handoff (Mid-Market)</div><div class="sme-name">Laura</div><div class="sme-links"><a href="https://drive.google.com/file/d/1cCqAeluMX3NWAQxChHTfEEv1FImV3Vpd/view?usp=drive_link" target="_blank">Video</a> <a href="https://docs.google.com/document/d/1Q8vQQQwOrkVYZ78qvUtnEWJg26DeeM7v8mJPHv2B0cs/edit?usp=drive_link" target="_blank">Exercise</a></div></div>
+    <div class="sme-card"><div class="sme-domain">Deal Lifecycle / Handoff (Enterprise)</div><div class="sme-name">Stef</div><div class="sme-links"><a href="https://drive.google.com/file/d/1pw2-ltWKqB8XqIV2esDGOCMH3LfLiUoX/view?usp=drive_link" target="_blank">Video</a> <a href="https://docs.google.com/document/d/1U4KIsqg4ZnUV5uAVU4e6jqhDN2xeHJi56n6ypgF4o8M/edit?usp=drive_link" target="_blank">Exercise</a></div></div>
+  </div>
+
+</div>
+
+<script>
+function switchTab(tabId, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+function toggleWeek(el, ev) {
+  const t = ev && ev.target;
+  if (!t) return;
+  if (t.closest && t.closest('a')) return;
+  if (t.closest && t.closest('.week-body') && !t.closest('.week-header')) return;
+  el.classList.toggle('collapsed');
+}
+</script>
+
+</body>
+</html>
