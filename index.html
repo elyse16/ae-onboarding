@@ -1,7 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
 <script type="application/json" id="cowork-artifact-meta">
 {
   "name": "Sales Onboarding Hub",
@@ -9,6 +6,9 @@
   "description": "Sales onboarding dashboard with five tabs: (1) day-by-day program schedule for weeks 1-4, (2) live reference data (subscriber counts, sponsors, placement types, ICP, tool stack), (3) async doc resources with links and placeholders, (4) hands-on exercise materials, (5) SME roster by domain. Data sourced from Metabase and Sponsy as of April 2026."
 }
 </script>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sales Onboarding Hub — TLDR</title>
 <style>
@@ -162,6 +162,30 @@ body {
 }
 
 /* SME cards */
+/* Playbook */
+.pb-section { margin-bottom: 20px; }
+.pb-section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.pb-num { width: 28px; height: 28px; background: rgba(213,19,235,0.1); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #d513eb; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+.pb-title { font-size: 15px; font-weight: 700; }
+.pb-objective { background: #f8f9fb; border-left: 3px solid #d513eb; padding: 10px 14px; margin-bottom: 12px; font-size: 13px; color: #555; }
+.pb-objective strong { color: #1a1a2e; }
+.pb-h3 { font-size: 13px; font-weight: 700; color: #1a1a2e; margin: 14px 0 8px; text-transform: uppercase; }
+.pb-h3 .marker { color: #d513eb; margin-right: 6px; }
+.pb-p { font-size: 13px; color: #555; line-height: 1.7; margin-bottom: 8px; }
+.pb-ul { list-style: none; padding: 0; margin-bottom: 10px; }
+.pb-ul li { font-size: 13px; color: #555; line-height: 1.7; padding: 4px 0 4px 16px; position: relative; }
+.pb-ul li::before { content: ""; width: 5px; height: 5px; background: #d513eb; border-radius: 50%; position: absolute; left: 0; top: 12px; }
+.pb-ol { list-style: none; padding: 0; counter-reset: pblist; margin-bottom: 10px; }
+.pb-ol li { font-size: 13px; color: #555; line-height: 1.7; padding: 4px 0 4px 24px; position: relative; counter-increment: pblist; }
+.pb-ol li::before { content: counter(pblist); color: #d513eb; font-weight: 700; font-size: 11px; position: absolute; left: 0; top: 4px; width: 18px; height: 18px; background: rgba(213,19,235,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.pb-callout { background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 0 8px 8px 0; padding: 10px 14px; margin: 10px 0; font-size: 13px; color: #92400e; }
+.pb-callout strong { color: #78350f; }
+.pb-card { background: #f8f9fb; border: 1px solid #eee; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; }
+.pb-card p { font-size: 13px; color: #555; margin-bottom: 6px; }
+.pb-card strong { color: #1a1a2e; }
+.pb-link { color: #d513eb; text-decoration: none; font-weight: 600; }
+.pb-link:hover { text-decoration: underline; }
+
 .sme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
 .sme-card { background: #f8f9fb; border: 1px solid #eee; border-radius: 10px; padding: 16px; }
 .sme-domain { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #d513eb; margin-bottom: 4px; }
@@ -185,11 +209,12 @@ body {
 </div>
 
 <div class="tabs">
-  <button type="button" class="tab active" onclick="switchTab('program', this)">Program Schedule</button>
-  <button type="button" class="tab" onclick="switchTab('reference', this)">TLDR at a Glance</button>
-  <button type="button" class="tab" onclick="switchTab('resources', this)">Resources</button>
-  <button type="button" class="tab" onclick="switchTab('exercises', this)">Exercises</button>
-  <button type="button" class="tab" onclick="switchTab('smes', this)">Subject Matter Experts</button>
+  <button class="tab active" onclick="switchTab('program')">Program Schedule</button>
+  <button class="tab" onclick="switchTab('reference')">TLDR at a Glance</button>
+  <button class="tab" onclick="switchTab('resources')">Resources</button>
+  <button class="tab" onclick="switchTab('exercises')">Exercises</button>
+  <button class="tab" onclick="switchTab('playbook')">Sales Playbook</button>
+  <button class="tab" onclick="switchTab('smes')">Subject Matter Experts</button>
 </div>
 
 <!-- ==================== PROGRAM SCHEDULE ==================== -->
@@ -208,7 +233,7 @@ body {
   </div>
 
   <!-- WEEK 1 -->
-  <div class="card" onclick="toggleWeek(this, event)">
+  <div class="card" onclick="toggleWeek(this)">
     <div class="week-header">
       <div class="week-title"><span class="num">Week 1</span> — Revenue Team Foundations</div>
       <div class="chevron">&#9662;</div>
@@ -233,7 +258,7 @@ body {
   </div>
 
   <!-- WEEK 2 -->
-  <div class="card" onclick="toggleWeek(this, event)">
+  <div class="card" onclick="toggleWeek(this)">
     <div class="week-header">
       <div class="week-title"><span class="num">Week 2</span> — Sales Bootcamp</div>
       <div class="chevron">&#9662;</div>
@@ -256,7 +281,7 @@ body {
   </div>
 
   <!-- WEEK 3 -->
-  <div class="card" onclick="toggleWeek(this, event)">
+  <div class="card" onclick="toggleWeek(this)">
     <div class="week-header">
       <div class="week-title"><span class="num">Week 3</span> — Pitch Prep + Shadowing</div>
       <div class="chevron">&#9662;</div>
@@ -308,7 +333,7 @@ body {
   </div>
 
   <!-- WEEK 4 -->
-  <div class="card" onclick="toggleWeek(this, event)">
+  <div class="card" onclick="toggleWeek(this)">
     <div class="week-header">
       <div class="week-title"><span class="num">Week 4</span> — BoB Activation</div>
       <div class="chevron">&#9662;</div>
@@ -365,8 +390,8 @@ body {
 <div id="reference" class="tab-content">
 
   <div class="stats-bar">
-    <div class="stat-card"><div class="stat-value">7.8M</div><div class="stat-label">Total Subscribers</div></div>
-    <div class="stat-card"><div class="stat-value">13</div><div class="stat-label">Newsletters</div></div>
+    <div class="stat-card"><div class="stat-value">6.7M+</div><div class="stat-label">Total Subscribers</div></div>
+    <div class="stat-card"><div class="stat-value">12</div><div class="stat-label">Newsletters</div></div>
     <div class="stat-card"><div class="stat-value">40–46%</div><div class="stat-label">Avg Open Rate</div></div>
     <div class="stat-card"><div class="stat-value">40%</div><div class="stat-label">Executive Readers</div></div>
   </div>
@@ -410,6 +435,8 @@ body {
       <div class="tool-card"><div class="tool-name">Amplemarket</div><div class="tool-purpose">Outbound — lead and company enrichment, contact discovery, outbound sequences.</div></div>
       <div class="tool-card"><div class="tool-name">RevenueHero</div><div class="tool-purpose">Inbound routing and scheduling — lead distribution to AEs.</div></div>
       <div class="tool-card"><div class="tool-name">Google Workspace</div><div class="tool-purpose">Docs, Sheets, Slides, Calendar — shared documents, proposal templates, meeting scheduling.</div></div>
+      <div class="tool-card"><div class="tool-name">Appeared.in</div><div class="tool-purpose">Ad spend intelligence — see who is sponsoring which newsletters. Use for competitive research and prospecting.</div></div>
+      <div class="tool-card"><div class="tool-name">Gamma</div><div class="tool-purpose">Presentation builder — create and share decks, proposals, and visual content.</div></div>
     </div>
   </div>
 
@@ -464,8 +491,11 @@ body {
     <div class="resource-item"><div><div class="resource-name">TLDR ICP</div><div class="resource-owner">Ideal customer profile, contact personas, ICP by newsletter vertical, reference accounts</div></div><a class="resource-link" href="https://docs.google.com/document/d/1h3a_h0s_195ih9anV3oTmoET1e29La3ukeusDXDk_GY/edit?tab=t.0" target="_blank">Open</a></div>
     <div class="resource-item"><div><div class="resource-name">GTM Handbook</div><div class="resource-owner">Official source of truth for GTM operations</div></div><a class="resource-link" href="https://docs.google.com/document/d/1HmIAsEzYcHSBu83XS11XLdiPPA-qZUyguOurkr4s3qs/edit?usp=sharing" target="_blank">Open</a></div>
     <div class="resource-item"><div><div class="resource-name">Pod R&amp;R Explainer</div><div class="resource-owner">AE / AM pod roles and responsibilities</div></div><a class="resource-link" href="https://docs.google.com/document/u/0/d/1YQPBSF8EZgoP1LF1j425NOJ5YKh8JtJajF3gYsP3ZBQ/edit" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">Sales Career Ladder</div><div class="resource-owner">AE and AM leveling framework — competencies, steps, promotion gates</div></div><a class="resource-link" href="https://docs.google.com/spreadsheets/d/1LrModNvhP7YMdg2bSNn2tM0VbYbgUs69IoJ6H0q9ZDQ/edit?gid=561626735#gid=561626735" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">Rules of Engagement</div><div class="resource-owner">Account ownership, qualifying opportunities, dispute resolution</div></div><a class="resource-link" href="https://docs.google.com/document/d/1VALVx3mGRGZ3Z6j5Q1d81EbIQ2mH0ELpLHxuRNcjf1c/edit?tab=t.0#heading=h.h6ze4rfn43fb" target="_blank">Open</a></div>
     <!-- SALES MOTION -->
     <div class="resource-item"><div><div class="resource-name">Sales FAQ</div><div class="resource-owner">Differentiators, competitors, common prospect questions</div></div><a class="resource-link" href="https://docs.google.com/document/d/1CWg4Qi-g2yyJMZVFQTxAZkTtBfeeCG0JWwIXWrkzl-Q/edit" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">Objection Handling</div><div class="resource-owner">Top objections with challenger-led playbook, real call examples, and coaching notes</div></div><a class="resource-link" href="https://docs.google.com/document/d/1bUipsV6rDICEnhYdUmkTL6Nj3wjxdBWpWqbxKO6q4a8/edit?tab=t.0#heading=h.tw65pkjffmnm" target="_blank">Open</a></div>
     <div class="resource-item"><div><div class="resource-name">Lifecycle of a Lead</div><div class="resource-owner">How leads flow through the system</div></div><a class="resource-link" href="https://docs.google.com/presentation/d/1rus_s4o5aVMOyHZDQZGFY2GXpsm3URmnGzqwTDSRRJ0/edit?slide=id.g3d319157bdb_2_2#slide=id.g3d319157bdb_2_2" target="_blank">Open</a></div>
     <div class="resource-item"><div><div class="resource-name">Outbound 2.0</div><div class="resource-owner">AE launch playbook for outbound</div></div><a class="resource-link" href="https://docs.google.com/presentation/d/11Ddlft5vP4dBnb_3ecfM5ltYScXQ1t-YlQTE_Mk9WSg/edit?slide=id.p1#slide=id.p1" target="_blank">Open</a></div>
     <div class="resource-item"><div><div class="resource-name">Outbound Playbook</div><div class="resource-owner">Tips for successful signal and non-signal based outbound (email + LinkedIn)</div></div><a class="resource-link" href="https://docs.google.com/document/d/1V4ADc_JVuySQyHJCPu4BnmAFPFjZeqHdbaBn3X3YanU/edit?tab=t.0#heading=h.3guj17wxyevd" target="_blank">Open</a></div>
@@ -478,6 +508,8 @@ body {
     <div class="resource-item"><div><div class="resource-name">Creative Best Practices</div><div class="resource-owner">Newsletter advertising best practices for advertisers</div></div><a class="resource-link" href="https://advertise.tldr.tech/newsletter-advertising-best-practices/" target="_blank">Open</a></div>
     <div class="resource-item"><div><div class="resource-name">Case Studies</div><div class="resource-owner">Advertiser success stories</div></div><a class="resource-link" href="https://advertise.tldr.tech/case-studies/" target="_blank">Open</a></div>
     <div class="resource-item"><div><div class="resource-name">Deal Post Mortem</div><div class="resource-owner">Three real deals (net-new win, test-to-expand win, renewal loss) broken down side-by-side</div></div><a class="resource-link" href="https://docs.google.com/document/d/14ltBvysAMZrbV0IMbzNPj7Nm4mXMY1l_7P7Ykw5aUjA/edit?tab=t.0#heading=h.csj8x9yi4ksi" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">Annotated Call Library</div><div class="resource-owner">14 curated calls across 10 reps — discovery, negotiation, objection handling, wins, and losses</div></div><a class="resource-link" href="https://docs.google.com/document/d/1Lp3W2PFiYiot8s6OBsrtVqeQtMXd1t20P3cbG-Yi_QI/edit?tab=t.0" target="_blank">Open</a></div>
+    <div class="resource-item"><div><div class="resource-name">First Deal Scavenger Hunt</div><div class="resource-owner">8-mission checklist simulating a real deal across HubSpot, Attention, Metabase, Sponsy, and Cowork</div></div><a class="resource-link" href="https://docs.google.com/document/d/1b2EBGYxyBzVNb6c2T6XFXs5dY4PVyz2QSNImPONWOYo/edit?tab=t.0" target="_blank">Open</a></div>
     <!-- TOOLS + RESEARCH -->
     <div class="resource-item"><div><div class="resource-name">Cowork Sales Setup Checklist</div><div class="resource-owner">Step-by-step setup guide for Cowork and sales tools</div></div><a class="resource-link" href="https://drive.google.com/file/d/1auTEzhkdwC1wqEQqZkL6wSzOvYTB0Els/view?usp=drive_link" target="_blank">Open</a></div>
     <div class="resource-item"><div><div class="resource-name">Appeared.in</div><div class="resource-owner">Ad spend intelligence tool</div></div><a class="resource-link" href="https://docs.google.com/presentation/d/1BdxHYQv8UMs-zwjoI5QUP7-VAs_y-0e_Kb-ym54kMWk/edit?slide=id.p1#slide=id.p1" target="_blank">Open</a></div>
@@ -490,10 +522,6 @@ body {
   <div class="card">
     <div class="card-title">Needs Refresh or <span class="accent">Build</span></div>
     <div class="placeholder-banner"><strong>These resources are in progress.</strong> Current versions linked where available. Owners noted for tracking.</div>
-    <div class="resource-item">
-      <div><div class="resource-name">Common Objections</div><div class="resource-owner">Owner: Marpo — Build</div></div>
-      <span class="resource-placeholder">Placeholder</span>
-    </div>
     <div class="resource-item">
       <div><div class="resource-name">Lifecycle of a Deal</div><div class="resource-owner">Owner: Marpo — Build</div></div>
       <span class="resource-placeholder">Placeholder</span>
@@ -514,7 +542,7 @@ body {
       <div class="exercise-week">Week 1</div>
       <div class="exercise-title">Curated Call Library</div>
       <div class="exercise-desc">Listen to 5–10 tagged Attention recordings across key sales scenarios. Take notes on what stood out.</div>
-      <div class="exercise-placeholder">Placeholder — Val or Marpo to select and tag recordings by scenario (great discovery, tough objection handling, strong close, instructive loss)</div>
+      <div class="exercise-placeholder">Done — see <a href="https://docs.google.com/document/d/1Lp3W2PFiYiot8s6OBsrtVqeQtMXd1t20P3cbG-Yi_QI/edit?tab=t.0" target="_blank" style="color:#d513eb;">Annotated Call Library</a> in Resources tab. 14 calls across 10 reps, organized into a 3-week listening plan.</div>
     </div>
   </div>
 
@@ -541,7 +569,7 @@ body {
       <div class="exercise-week">Week 2</div>
       <div class="exercise-title">First Deal Scavenger Hunt</div>
       <div class="exercise-desc">10-step checklist simulating a real deal setup across all tools. Complete with buddy on the call.</div>
-      <div class="exercise-placeholder">Placeholder — Elyse to design checklist. Tasks span HubSpot, Sponsy, Metabase, Firecrawl, and Cowork.</div>
+      <div class="exercise-placeholder">Done — see <a href="https://docs.google.com/document/d/1b2EBGYxyBzVNb6c2T6XFXs5dY4PVyz2QSNImPONWOYo/edit?tab=t.0" target="_blank" style="color:#d513eb;">First Deal Scavenger Hunt</a> in Resources tab. 8 missions using the Arclight AI scenario.</div>
     </div>
   </div>
 
@@ -550,7 +578,7 @@ body {
       <div class="exercise-week">Week 2</div>
       <div class="exercise-title">Objection Role-Play</div>
       <div class="exercise-desc">Top 8–10 objections with on-voice TLDR responses. Role-play with buddy.</div>
-      <div class="exercise-placeholder">Placeholder — Marpo to build objection + response resource. <a href="https://docs.google.com/document/d/1N4wqdWCSQSalKppH1zw5KoJhEXocR5OnZ-qAKuc8ZtM/edit?tab=t.0" target="_blank" style="color:#d513eb;">Existing objection handling doc</a></div>
+      <div class="exercise-placeholder">Done — see <a href="https://docs.google.com/document/d/1bUipsV6rDICEnhYdUmkTL6Nj3wjxdBWpWqbxKO6q4a8/edit?tab=t.0#heading=h.tw65pkjffmnm" target="_blank" style="color:#d513eb;">Objection Handling Playbook</a> in Resources tab. 11 objection categories with real call examples and coaching notes.</div>
     </div>
   </div>
 
@@ -614,6 +642,201 @@ body {
 
 </div>
 
+<!-- ==================== SALES PLAYBOOK ==================== -->
+<div id="playbook" class="tab-content">
+
+  <div style="font-size:13px;color:#555;margin-bottom:16px;padding:14px 16px;background:#fff;border-radius:8px;border:1px solid #e8e8ee;line-height:1.7;">
+    The operating manual for every seller at TLDR. How we prospect, prep, qualify, pitch, close, and forecast.
+    <br><span style="color:#999;">Owner: Valerie Bartlett · Updated May 2026 · Reviewed quarterly</span>
+  </div>
+
+  <!-- 01 Operating Rhythm -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">01</div><div class="pb-title">The Operating Rhythm</div></div>
+      <div class="pb-objective"><strong>Why it matters:</strong> The cadence every seller follows. Non-negotiable.</div>
+      <table class="data-table">
+        <thead><tr><th>Cadence</th><th>What</th><th>Owner</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Daily</strong></td><td>Read morning digest before first call; update HubSpot — log calls, notes, next steps</td><td>All sellers</td></tr>
+          <tr><td><strong>Bi-weekly</strong></td><td>1:1 — pipeline + blockers</td><td>Rep + Manager</td></tr>
+          <tr><td><strong>Bi-weekly</strong></td><td>Revenue Lab</td><td>Sales team</td></tr>
+          <tr><td><strong>Monthly</strong></td><td>Revenue All Hands</td><td>Managers + Val</td></tr>
+          <tr><td><strong>Quarterly</strong></td><td>All Company All Hands</td><td>All</td></tr>
+        </tbody>
+      </table>
+      <div class="pb-callout"><strong>Rule of thumb:</strong> If a deal isn't in HubSpot by EOD, it doesn't exist. Forecast accuracy is a leading indicator of operational maturity — we measure it.</div>
+    </div>
+  </div>
+
+  <!-- 02 Prospecting -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">02</div><div class="pb-title">Prospecting</div></div>
+      <div class="pb-objective"><strong>Objective:</strong> Build a high-quality pipeline of accounts that match TLDR's ICP and have a credible budget for newsletter advertising. Marketing Operations automates and runs the sequencing in Amplemarket; AEs provide the signal that drives the outbound sequence.</div>
+      <div class="pb-h3"><span class="marker">2a</span> Find the right companies</div>
+      <ul class="pb-ul">
+        <li><strong>Lookalikes to closed-won customers</strong> — easiest wins. Pull past advertisers in your vertical from HubSpot; find direct competitors via Sales Nav, ZoomInfo, or Google.</li>
+        <li><strong>Industry maps &amp; sponsor databases</strong> — WhoSponsorsStuff and Appeared.in for newsletter coverage; G2/Crunchbase landscape maps for vertical scans.</li>
+        <li><strong>Filter rule:</strong> Check HubSpot ownership before adding. Territory disputes burn cycles.</li>
+      </ul>
+      <div class="pb-h3"><span class="marker">2b</span> Find the right people</div>
+      <div class="pb-p"><strong>Tool:</strong> Sales Navigator. <strong>Target titles:</strong> Demand Gen, Growth, Field Marketing, CMO/VP Marketing, Product Marketing, Content Marketing, Digital Marketing.</div>
+      <div class="pb-h3"><span class="marker">2c</span> Request the outbound</div>
+      <div class="pb-p">Use the <a class="pb-link" href="https://docs.google.com/spreadsheets/d/1gwWYd7Gz2KD5NiPL0NO3ZO2LRzN7MANR8CMUsbSYbOw/edit?usp=sharing" target="_blank">outbound request sheet</a> and provide relevant details to the Marketing Operations team to set up sequences on your behalf.</div>
+      <div class="pb-callout"><strong>Heads up:</strong> Make sure your email and LinkedIn Premium are provisioned into Amplemarket before requesting outbound.</div>
+    </div>
+  </div>
+
+  <!-- 03 Pre-Meeting Prep -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">03</div><div class="pb-title">Pre-Meeting Prep</div></div>
+      <div class="pb-objective"><strong>Biggest change from prior playbook:</strong> You no longer manually research before every call. The system does it for you.</div>
+      <div class="pb-h3"><span class="marker">3a</span> Daily Digest</div>
+      <div class="pb-p">Every morning in Slack you get a digest covering all your external meetings for the day. It includes deal history, past placement performance, newsletter coverage, audience fit, call history, and key talk-track notes.</div>
+      <div class="pb-h3"><span class="marker">3b</span> Cowork skills for ad-hoc prep</div>
+      <ul class="pb-ul">
+        <li><strong>/tldr-sales-account-research</strong> — structured intel on any company</li>
+        <li><strong>/tldr-sales-query-builder</strong> — ad-hoc data questions</li>
+        <li><strong>/tldr-sales-morning-brief</strong> — re-run the digest on demand</li>
+      </ul>
+      <div class="pb-h3"><span class="marker">3c</span> The four questions to answer before any call</div>
+      <ol class="pb-ol">
+        <li>What does the company do, and how big are they?</li>
+        <li>Who in their competitive set has run with us — and how did it perform?</li>
+        <li>Have we covered them organically? (If yes, that's a warm lever.)</li>
+        <li>What's their most likely audience fit?</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- 04 Discovery & Qualification -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">04</div><div class="pb-title">Discovery &amp; Qualification</div></div>
+      <div class="pb-objective"><strong>Objective:</strong> Understand the buyer well enough to recommend a campaign that will succeed — not just one that fits their budget.</div>
+      <div class="pb-h3"><span class="marker">4a</span> Discovery questions — pick 5–7 that move the deal</div>
+      <div class="pb-card"><p><strong>About them</strong></p><ul class="pb-ul"><li>Have you run newsletter advertising before? What worked, what didn't?</li><li>What product or offer is this campaign supporting?</li><li>Who is the target audience — title, function, seniority, company size?</li><li>What KPIs define success? Who reviews them post-campaign?</li></ul></div>
+      <div class="pb-card"><p><strong>About the deal</strong></p><ul class="pb-ul"><li>Time frame?</li><li>Budget range? Frame it: "this helps me recommend placements you'll actually run."</li><li>Who else is in the decision? Procurement?</li><li>Where else are you advertising and how's it performing?</li></ul></div>
+      <div class="pb-card"><p><strong>About next steps</strong></p><ul class="pb-ul"><li>What does your decision process look like from here?</li><li>When can we get on the calendar to walk through a proposal?</li></ul></div>
+      <div class="pb-h3"><span class="marker">4b</span> The "do not skip" criteria</div>
+      <div class="pb-p">A deal does not move past Discovery to Proposal until you have: confirmed budget range, confirmed timeframe, identified the economic buyer, and confirmed KPI definition. Missing any = stays in Discovery.</div>
+      <div class="pb-callout"><strong>Reminder:</strong> Always book the next meeting on the current call. Calendar momentum is the #1 leading indicator of close rate.</div>
+    </div>
+  </div>
+
+  <!-- 05 Pitch & Proposal -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">05</div><div class="pb-title">The Pitch / Proposal</div></div>
+      <div class="pb-objective"><strong>Objective:</strong> Show why TLDR fits <em>this</em> buyer's <em>specific</em> goal — not deliver a generic kit.</div>
+      <div class="pb-h3"><span class="marker">5a</span> Use the proposal builder</div>
+      <ul class="pb-ul">
+        <li><strong>/tldr-sales-proposal-builder</strong> generates a branded .pptx proposal + follow-up email from a six-field rep brief</li>
+        <li>The builder is <strong>policy-aware</strong> — pulls live rate-card pricing and refuses non-compliant overrides</li>
+        <li>Don't hand-edit the deck out of policy. Route deviations through Deal Desk in Slack.</li>
+      </ul>
+      <div class="pb-h3"><span class="marker">5b</span> Pitch flow on the call</div>
+      <ol class="pb-ol">
+        <li><strong>Recap discovery</strong> — "You mentioned X audience, Y goal, Z timing."</li>
+        <li><strong>Why TLDR vs. other newsletters</strong> — audience scale, engagement, intent</li>
+        <li><strong>Why TLDR vs. other channels</strong></li>
+        <li><strong>Placement options</strong> — Primary vs. Secondary vs. Quick Links; trade-offs</li>
+        <li><strong>Audience fit</strong> — demographic overlap with their ICP</li>
+        <li><strong>Avg. click performance</strong> — for recommended placements, in their vertical</li>
+        <li><strong>How we work</strong> — 7-day copy turnaround, post-campaign reporting, dedicated CSM</li>
+        <li><strong>Recommendation + 2 alternatives</strong> — good / better / best</li>
+      </ol>
+      <div class="pb-h3"><span class="marker">5c</span> Pricing posture</div>
+      <div class="pb-objective"><strong>We lead with value.</strong> ACV target per deal is $25K and 2+ placements. Discounts must adhere to policy or be escalated via Deal Desk.</div>
+    </div>
+  </div>
+
+  <!-- 06 Next Steps & Follow-Up -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">06</div><div class="pb-title">Next Steps &amp; Follow-Up</div></div>
+      <div class="pb-objective"><strong>Objective:</strong> Close the gap between meeting and momentum. The follow-up is the deal.</div>
+      <div class="pb-h3"><span class="marker">6a</span> From your side — commit on the call</div>
+      <ul class="pb-ul">
+        <li>Send a proposal within 24 hours</li>
+        <li>Share comparable campaign examples</li>
+        <li>Share avg. click performance for recommended placements</li>
+        <li>Send the follow-up email immediately after</li>
+      </ul>
+      <div class="pb-h3"><span class="marker">6b</span> From their side — set expectations</div>
+      <ul class="pb-ul"><li>Internal review with manager</li><li>Build the business case</li><li>Budget approval</li><li>Signature</li></ul>
+      <div class="pb-h3"><span class="marker">6c</span> Following up</div>
+      <ul class="pb-ul">
+        <li><strong>Same-day email:</strong> recap discovery, attach proposal, propose next meeting time</li>
+        <li><strong>Task creation:</strong> create the HubSpot task before you close the call notes</li>
+        <li><strong>The 3-touch rule:</strong> follow up 3 times across 2 weeks before marking cold</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 07 Pipeline Hygiene & Forecast -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">07</div><div class="pb-title">Pipeline Hygiene &amp; Forecast</div></div>
+      <div class="pb-objective"><strong>Objective:</strong> A clean pipeline is the only honest pipeline.</div>
+      <div class="pb-h3"><span class="marker">7a</span> Deal stage definitions</div>
+      <table class="data-table">
+        <thead><tr><th>Stage</th><th>Weight</th></tr></thead>
+        <tbody>
+          <tr><td><strong>New Deal</strong></td><td style="color:#d513eb;font-weight:700;">10%</td></tr>
+          <tr><td><strong>Meeting Scheduled</strong></td><td style="color:#d513eb;font-weight:700;">20%</td></tr>
+          <tr><td><strong>Meeting Completed</strong></td><td style="color:#d513eb;font-weight:700;">30%</td></tr>
+          <tr><td><strong>Proposal Sent</strong></td><td style="color:#d513eb;font-weight:700;">60%</td></tr>
+          <tr><td><strong>Contract Sent</strong></td><td style="color:#d513eb;font-weight:700;">90%</td></tr>
+          <tr><td><strong>Closed Won</strong></td><td style="color:#d513eb;font-weight:700;">100%</td></tr>
+          <tr><td><strong>Closed Lost</strong></td><td style="color:#999;">0%</td></tr>
+        </tbody>
+      </table>
+      <div class="pb-h3"><span class="marker">7b</span> Hygiene rules — every Friday</div>
+      <ul class="pb-ul">
+        <li>Every open deal has a future close date — no past-dated deals</li>
+        <li>Every open deal has a next step + next-step date</li>
+        <li>Every deal in Proposal+ has all criteria filled out</li>
+        <li>Stuck deals (no activity in 30 days) get pushed to Closed-Lost or Nurture</li>
+      </ul>
+      <div class="pb-h3"><span class="marker">7c</span> Forecast categories</div>
+      <table class="data-table">
+        <thead><tr><th>Category</th><th>Definition</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Line of Sight</strong></td><td>Best case scenario</td></tr>
+          <tr><td><strong>Commit</strong></td><td>Most accurate read on what you think you'll land at for the quarter</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 08 What Works -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">08</div><div class="pb-title">What Works (Field Wisdom)</div></div>
+      <ul class="pb-ul">
+        <li><strong>Know your client.</strong> Don't ask things a 5-min Google or the morning digest would answer.</li>
+        <li><strong>Use social proof.</strong> Mention competitors and look-alikes who've run with us. Concrete numbers beat generic logos.</li>
+        <li><strong>Set expectations &amp; keep your word.</strong> "I'll follow up Thursday" → follow up Thursday, even with nothing new.</li>
+        <li><strong>Calibrate performance promises.</strong> "I expect this to perform at category average — here's what that means in clicks and CTOR."</li>
+        <li><strong>Ask the buyer to talk to a developer at their company.</strong> They'll find TLDR readers internally — instant credibility.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 09 Performance Bar -->
+  <div class="card">
+    <div class="pb-section">
+      <div class="pb-section-header"><div class="pb-num">09</div><div class="pb-title">Performance Bar</div></div>
+      <div class="pb-objective"><strong>Why it matters:</strong> What "good" looks like at TLDR — by role. Public bar so every rep knows where they stand.</div>
+      <div class="pb-p">Reference the <a class="pb-link" href="https://docs.google.com/spreadsheets/d/1LrModNvhP7YMdg2bSNn2tM0VbYbgUs69IoJ6H0q9ZDQ/edit?usp=sharing" target="_blank">leveling framework</a> to understand expectations by level and role.</div>
+    </div>
+  </div>
+
+</div>
+
 <!-- ==================== SUBJECT MATTER EXPERTS ==================== -->
 <div id="smes" class="tab-content">
 
@@ -634,17 +857,15 @@ body {
 </div>
 
 <script>
-function switchTab(tabId, btn) {
+function switchTab(tabId) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   document.getElementById(tabId).classList.add('active');
-  if (btn) btn.classList.add('active');
+  event.target.classList.add('active');
 }
-function toggleWeek(el, ev) {
-  const t = ev && ev.target;
-  if (!t) return;
-  if (t.closest && t.closest('a')) return;
-  if (t.closest && t.closest('.week-body') && !t.closest('.week-header')) return;
+function toggleWeek(el) {
+  if (event.target.closest('a')) return;
+  if (event.target.closest('.week-body') && !event.target.closest('.week-header')) return;
   el.classList.toggle('collapsed');
 }
 </script>
