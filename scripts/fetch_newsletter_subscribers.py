@@ -73,17 +73,17 @@ NEWSLETTER_LABELS: list[tuple[str, str]] = [
 NL_FREQ_BY_LABEL: dict[str, str] = {
     "TLDR": "Mon–Fri",
     "TLDR AI": "Mon–Fri",
-    "TLDR IT": "Schedule varies",
-    "TLDR Data": "Schedule varies",
+    "TLDR Data": "Mon & Thu",
+    "TLDR IT": "Mon–Fri",
     "TLDR Dev": "Mon–Fri",
-    "TLDR Fintech": "Schedule varies",
-    "TLDR Product": "Tue–Fri",
-    "TLDR InfoSec": "Mon–Wed–Fri",
+    "TLDR Fintech": "Mon & Thu",
+    "TLDR Product": "Tue & Fri",
+    "TLDR InfoSec": "Mon–Fri",
     "TLDR Founders": "Mon–Wed–Fri",
     "TLDR DevOps": "Mon–Wed–Fri",
+    "TLDR Crypto": "Mon–Fri",
     "TLDR Marketing": "Mon–Fri",
     "TLDR Design": "Mon–Fri",
-    "TLDR Crypto": "Mon–Fri",
 }
 
 
