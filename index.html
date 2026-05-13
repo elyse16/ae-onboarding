@@ -212,6 +212,12 @@ body {
 /* Section divider */
 .section-divider { margin: 20px 0 16px; padding-top: 16px; border-top: 1px solid #eee; }
 .section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #999; margin-bottom: 12px; }
+
+.resource-tab-link {
+  background: none; border: none; padding: 0; margin: 0; font: inherit;
+  color: #d513eb; font-weight: 600; cursor: pointer; text-decoration: underline;
+}
+.resource-tab-link:hover { color: #b010c7; }
 </style>
 </head>
 <body>
@@ -681,6 +687,11 @@ body {
 
   <div class="card">
     <div class="card-title">Ready <span class="accent">Resources</span></div>
+    <div style="font-size:13px;color:#555;margin-bottom:16px;padding:12px 14px;background:#f8f9fb;border-radius:8px;border:1px solid #e8e8ee;line-height:1.65;">
+      <strong>SME video prep:</strong> Short Loom walkthroughs (portfolio, Amplemarket, lead distribution, and more) live on the
+      <button type="button" class="resource-tab-link" onclick="switchTab('smes')">Subject Matter Experts</button>
+      tab on each SME card. Watch the relevant ones <em>before</em> your SME week or whenever you’re stuck on that tool — then use your live SME session to go deeper.
+    </div>
 
     <div class="resource-category">
       <div class="resource-cat-title"><span class="resource-cat-num">1.</span>Company &amp; Audience Foundations</div>
@@ -852,7 +863,8 @@ body {
 <!-- ==================== SUBJECT MATTER EXPERTS ==================== -->
 <div id="smes" class="tab-content">
 
-  <p style="font-size:14px;color:#555;margin-bottom:16px;">Each SME owns a recorded video walkthrough and a live session with the new hire. They're your go-to person for questions in their domain.</p>
+  <p style="font-size:14px;color:#555;margin-bottom:12px;line-height:1.65;">Each SME owns a live session with you and recorded walkthroughs where noted. They’re your go-to for questions in their domain.</p>
+  <p style="font-size:14px;color:#555;margin-bottom:16px;line-height:1.65;"><strong>When to watch:</strong> Open the Looms or videos on an SME’s card <em>before</em> the week where you meet them (see Program Schedule), or any time you’re ramping on that tool. They’re meant as self-serve prep so your live time can focus on edge cases and your book — not a repeat of the basics.</p>
 
   <div class="sme-grid">
     <div class="sme-card"><div class="sme-domain">HubSpot</div><div class="sme-name">Riley</div><div class="sme-links"><a href="https://drive.google.com/file/d/120Fst-4mmstEv_wSJNSUmTkuhzHJey6F/view" target="_blank">Video</a> <a href="https://docs.google.com/document/d/1RwW_5u5bKCeZj3dy7w9OxqBChJx_5_H4ZI027zawZj8/edit?usp=sharing" target="_blank">Deal creation one-pager</a></div></div>
@@ -870,10 +882,14 @@ body {
 
 <script>
 function switchTab(tabId) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active');
-  event.target.classList.add('active');
+  document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+  document.querySelectorAll('.tab-content').forEach(function (c) { c.classList.remove('active'); });
+  var panel = document.getElementById(tabId);
+  if (panel) panel.classList.add('active');
+  document.querySelectorAll('.tab').forEach(function (t) {
+    var oc = t.getAttribute('onclick') || '';
+    if (oc.indexOf("switchTab('" + tabId + "')") !== -1) t.classList.add('active');
+  });
 }
 function toggleWeek(el) {
   if (event.target.closest('a')) return;
