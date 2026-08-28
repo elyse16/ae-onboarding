@@ -7,8 +7,14 @@ Requires network access to https://internal.tldr.tech (VPN / corp network).
 If the endpoint returns 401/403, set auth via environment variables — see
 --help.
 
-Does NOT filter on stay_subscribed (see product caveats). Uses readers.*_subscribed
-booleans and webdev_subscribed for TLDR Dev only.
+Does NOT filter on stay_subscribed: that flag is true for only 1-2% of rows in every
+signup-year cohort back to 2018, so it is a rare preference flag, not an activity
+flag. Uses readers.*_subscribed booleans, and webdev_subscribed for TLDR Dev.
+
+Updates ONLY the nl-subs number on each card in "TLDR at a Glance", plus the two
+stats-bar values and the freshness line. The rest of each card (cadence + live open
+rate, rate-card reference, audience profile) is hand-maintained in index.html and is
+deliberately left untouched.
 
 **Does this update the hub on its own?** No. The hub only changes when you run this
 script (e.g. manually) or when you schedule it (cron, launchd, GitHub Actions with a
@@ -40,6 +46,7 @@ SELECT
   countDistinctIf(email, ai_subscribed)        AS tldr_ai,
   countDistinctIf(email, data_subscribed)      AS tldr_data,
   countDistinctIf(email, it_subscribed)        AS tldr_it,
+  countDistinctIf(email, hardware_subscribed)  AS tldr_hardware,
   countDistinctIf(email, webdev_subscribed)    AS tldr_dev,
   countDistinctIf(email, infosec_subscribed)   AS tldr_infosec,
   countDistinctIf(email, product_subscribed)   AS tldr_product,
@@ -58,6 +65,7 @@ NEWSLETTER_LABELS: list[tuple[str, str]] = [
     ("tldr_ai", "TLDR AI"),
     ("tldr_data", "TLDR Data"),
     ("tldr_it", "TLDR IT"),
+    ("tldr_hardware", "TLDR Hardware"),
     ("tldr_dev", "TLDR Dev"),
     ("tldr_infosec", "TLDR InfoSec"),
     ("tldr_product", "TLDR Product"),
@@ -75,6 +83,7 @@ NL_FREQ_BY_LABEL: dict[str, str] = {
     "TLDR AI": "Mon–Fri",
     "TLDR Data": "Mon & Thu",
     "TLDR IT": "Mon–Fri",
+    "TLDR Hardware": "Mon, Wed & Fri",
     "TLDR Dev": "Mon–Fri",
     "TLDR Fintech": "Mon & Thu",
     "TLDR Product": "Tue & Fri",
@@ -112,30 +121,59 @@ def _parse_counts(row: dict[str, Any]) -> list[tuple[str, str, int]]:
 
 
 def format_total_stat(sum_subs: int) -> str:
-    """Match hub style (~7.05M): sum of per-newsletter distinct counts."""
-    return f"~{sum_subs / 1e6:.2f}M"
+    """Match hub style (7.78M): sum of per-newsletter distinct counts."""
+    return f"{sum_subs / 1e6:.2f}M"
 
 
-def build_nl_grid_inner_html(rows_sorted: list[tuple[str, str, int]]) -> str:
-    lines: list[str] = []
-    for _, lab, n in rows_sorted:
-        freq = NL_FREQ_BY_LABEL.get(lab, "Schedule varies")
-        safe_lab = html.escape(lab)
-        safe_freq = html.escape(freq)
-        lines.append(
-            f'      <div class="nl-card"><div class="nl-name">{safe_lab}</div>'
-            f'<div class="nl-subs">{n:,}</div><div class="nl-freq">{safe_freq}</div></div>'
-        )
-    return "\n".join(lines)
+def format_subs(n: int) -> str:
+    """Hub card style: 1.52M above a million, else 595K."""
+    if n >= 1_000_000:
+        return f"{n / 1e6:.2f}M"
+    return f"{round(n / 1000):,}K"
+
+
+# Matches one newsletter card up to and including its nl-subs value. Everything
+# after nl-subs (cadence + live open rate, rate-card reference, audience profile)
+# is hand-maintained in index.html and must survive a refresh, so this script
+# rewrites ONLY the nl-subs number and never regenerates the card.
+_RE_NL_CARD_SUBS = re.compile(
+    r'(<div class="nl-card"><div class="nl-name">)([^<]*)(</div><div class="nl-subs">)([^<]*)(</div>)'
+)
+
+
+def update_nl_grid_counts(
+    grid_inner: str, counts_by_label: dict[str, int]
+) -> tuple[str, list[str], list[str]]:
+    """Rewrite each card's nl-subs value in place.
+
+    Returns (new_grid_inner, updated_labels, unknown_card_labels).
+    Cards whose name is not in counts_by_label are left untouched.
+    """
+    updated: list[str] = []
+    unknown: list[str] = []
+
+    def _sub(m: "re.Match[str]") -> str:
+        label = html.unescape(m.group(2)).strip()
+        if label not in counts_by_label:
+            unknown.append(label)
+            return m.group(0)
+        updated.append(label)
+        return m.group(1) + m.group(2) + m.group(3) + format_subs(counts_by_label[label]) + m.group(5)
+
+    return _RE_NL_CARD_SUBS.sub(_sub, grid_inner), updated, unknown
 
 
 def build_fragment_html(rows_sorted: list[tuple[str, str, int]]) -> str:
-    """Pasteable snippet: inner HTML only (no wrapping nl-grid)."""
-    return build_nl_grid_inner_html(rows_sorted)
+    """Pasteable summary: one label/count per line (not card HTML).
+
+    Card markup is hand-maintained in index.html; emitting full cards here
+    invites pasting over the open-rate, rate-card and audience lines.
+    """
+    return "\n".join(f"{lab}: {format_subs(n)}  ({n:,})" for _, lab, n in rows_sorted)
 
 
 _RE_TOTAL = re.compile(
-    r'(<div class="stats-bar">\s*<div class="stat-card"><div class="stat-value">)([^<]+)(</div><div class="stat-label">Total Subscribers</div></div>)',
+    r'(<div class="stats-bar">\s*<div class="stat-card"><div class="stat-value">)([^<]+)(</div><div class="stat-label">Live Subscriptions</div></div>)',
     re.DOTALL,
 )
 _RE_NEWSLETTER_COUNT = re.compile(
@@ -162,9 +200,14 @@ def patch_index_html(
     total_sum = sum(r[2] for r in rows_sorted)
     new_total = format_total_stat(total_sum)
     n_newsletters = len(NEWSLETTER_LABELS)
-    new_grid = build_nl_grid_inner_html(rows_sorted)
+    counts_by_label = {lab: n for _, lab, n in rows_sorted}
     today = date.today()
-    freshness = f"Subscriber counts from Metabase — {today:%B} {today.day}, {today:%Y}"
+    freshness = (
+        "Headline subscriber counts are LIVE from the reader database (distinct "
+        "subscribed readers per newsletter). Open rates are live 30-day averages "
+        "from actual send data. Quote the rate-card figures in proposals &mdash; "
+        f"those are the contractual numbers. Counts refreshed {today:%B} {today.day}, {today:%Y}."
+    )
 
     log: list[str] = []
     m1 = _RE_TOTAL.search(html_text)
@@ -188,10 +231,17 @@ def patch_index_html(
         raise ValueError("Newsletters count regex replace failed.")
     log.append(f"Newsletter count stat: {n_newsletters}")
 
-    out, n_grid = _RE_NL_GRID.subn(rf"\g<1>{new_grid}\g<3>", out, count=1)
-    if n_grid != 1:
+    m_grid = _RE_NL_GRID.search(out)
+    if not m_grid:
         raise ValueError("nl-grid regex replace failed.")
-    log.append("nl-grid: replaced all newsletter cards (sorted by subscribers, descending).")
+    new_inner, updated, unknown = update_nl_grid_counts(m_grid.group(2), counts_by_label)
+    out = out[: m_grid.start(2)] + new_inner + out[m_grid.end(2) :]
+    log.append(f"nl-grid: updated nl-subs on {len(updated)} card(s); other card lines preserved.")
+    if unknown:
+        log.append(f"Warning: card(s) with no matching count, left unchanged: {', '.join(unknown)}")
+    absent = [lab for lab in counts_by_label if lab not in updated]
+    if absent:
+        log.append(f"Warning: count fetched but no card found for: {', '.join(absent)}")
 
     m4 = _RE_FRESHNESS.search(out)
     if m4:
