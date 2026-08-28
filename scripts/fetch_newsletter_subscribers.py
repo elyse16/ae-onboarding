@@ -55,7 +55,12 @@ SELECT
   countDistinctIf(email, devops_subscribed)    AS tldr_devops,
   countDistinctIf(email, crypto_subscribed)    AS tldr_crypto,
   countDistinctIf(email, marketing_subscribed) AS tldr_marketing,
-  countDistinctIf(email, design_subscribed)    AS tldr_design
+  countDistinctIf(email, design_subscribed)    AS tldr_design,
+  -- Legacy lists: counted in the portfolio total only, no card on the hub.
+  countDistinctIf(email, mobile_dev_subscribed) AS legacy_mobile_dev,
+  countDistinctIf(email, gamedev_subscribed)    AS legacy_gamedev,
+  countDistinctIf(email, telecom_subscribed)    AS legacy_telecom,
+  countDistinctIf(email, applied_ai_subscribed) AS legacy_applied_ai
 FROM readers
 """.strip()
 
@@ -75,6 +80,16 @@ NEWSLETTER_LABELS: list[tuple[str, str]] = [
     ("tldr_crypto", "TLDR Crypto"),
     ("tldr_marketing", "TLDR Marketing"),
     ("tldr_design", "TLDR Design"),
+]
+
+# Lists that exist in the reader DB but have never carried a sponsorship. They are
+# NOT shown as cards and NOT counted in the "Newsletters" stat, but they ARE part of
+# the media-kit portfolio total ("8M+"), so they are summed into the total stat.
+LEGACY_KEYS: list[str] = [
+    "legacy_mobile_dev",
+    "legacy_gamedev",
+    "legacy_telecom",
+    "legacy_applied_ai",
 ]
 
 # Cadence copy for TLDR at a Glance cards (not returned by the SQL API)
@@ -120,9 +135,20 @@ def _parse_counts(row: dict[str, Any]) -> list[tuple[str, str, int]]:
     return out
 
 
+def parse_legacy_total(row: dict[str, Any]) -> int:
+    """Sum the legacy lists. Missing keys are tolerated (older SQL / API shape)."""
+    total = 0
+    for key in LEGACY_KEYS:
+        raw = row.get(key)
+        if raw is None:
+            continue
+        total += int(str(raw).replace(",", "").strip())
+    return total
+
+
 def format_total_stat(sum_subs: int) -> str:
-    """Match hub style (7.78M): sum of per-newsletter distinct counts."""
-    return f"{sum_subs / 1e6:.2f}M"
+    """Match hub style (8.2M): portfolio total incl. legacy lists."""
+    return f"{sum_subs / 1e6:.1f}M"
 
 
 def format_subs(n: int) -> str:
@@ -173,7 +199,7 @@ def build_fragment_html(rows_sorted: list[tuple[str, str, int]]) -> str:
 
 
 _RE_TOTAL = re.compile(
-    r'(<div class="stats-bar">\s*<div class="stat-card"><div class="stat-value">)([^<]+)(</div><div class="stat-label">Live Subscriptions</div></div>)',
+    r'(<div class="stats-bar">\s*<div class="stat-card"><div class="stat-value">)([^<]+)(</div><div class="stat-label">Total Subscriptions</div></div>)',
     re.DOTALL,
 )
 _RE_NEWSLETTER_COUNT = re.compile(
@@ -194,19 +220,23 @@ def patch_index_html(
     rows: list[tuple[str, str, int]],
     *,
     dry_run: bool,
+    legacy_total: int = 0,
 ) -> tuple[str, list[str]]:
     """Return (new_html, log_lines). Raises ValueError if patterns do not match."""
     rows_sorted = sorted(rows, key=lambda r: r[2], reverse=True)
-    total_sum = sum(r[2] for r in rows_sorted)
+    card_sum = sum(r[2] for r in rows_sorted)
+    total_sum = card_sum + legacy_total
     new_total = format_total_stat(total_sum)
     n_newsletters = len(NEWSLETTER_LABELS)
     counts_by_label = {lab: n for _, lab, n in rows_sorted}
     today = date.today()
     freshness = (
         "Headline subscriber counts are LIVE from the reader database (distinct "
-        "subscribed readers per newsletter). Open rates are live 30-day averages "
-        "from actual send data. Quote the rate-card figures in proposals &mdash; "
-        f"those are the contractual numbers. Counts refreshed {today:%B} {today.day}, {today:%Y}."
+        "subscribed readers per newsletter). The 14 newsletters below are the ones "
+        f"that carry advertising and sum to {card_sum / 1e6:.2f}M; the {new_total} portfolio total also "
+        "includes three legacy lists that are not sold. Open rates are live 30-day "
+        "averages from actual send data. Quote the rate-card figures in proposals "
+        f"&mdash; those are the contractual numbers. Counts refreshed {today:%B} {today.day}, {today:%Y}."
     )
 
     log: list[str] = []
@@ -224,7 +254,11 @@ def patch_index_html(
     out, n_subs = _RE_TOTAL.subn(rf"\g<1>{new_total}\g<3>", out, count=1)
     if n_subs != 1:
         raise ValueError("Total subscribers regex replace failed.")
-    log.append(f"Total stat: {new_total} (sum of column distinct counts = {total_sum:,})")
+    log.append(
+        f"Total stat: {new_total} (portfolio total {total_sum:,} = "
+        f"{card_sum:,} across {len(rows_sorted)} advertising newsletters "
+        f"+ {legacy_total:,} on legacy lists)"
+    )
 
     out, n_cnt = _RE_NEWSLETTER_COUNT.subn(rf"\g<1>{n_newsletters}\g<3>", out, count=1)
     if n_cnt != 1:
@@ -258,8 +292,8 @@ def patch_index_html(
     return out, log
 
 
-def fetch_counts() -> tuple[list[tuple[str, str, int]], str]:
-    """Return (counts, raw_json_body)."""
+def fetch_counts() -> tuple[list[tuple[str, str, int]], int, str]:
+    """Return (counts, legacy_total, raw_json_body)."""
     body = json.dumps(
         {"name": "metabase_execute_sql", "arguments": {"sql": SQL}}
     ).encode("utf-8")
@@ -306,7 +340,7 @@ def fetch_counts() -> tuple[list[tuple[str, str, int]], str]:
         raise RuntimeError(f"Unexpected row type: {type(row)!r}")
 
     counts = _parse_counts(row)
-    return counts, raw
+    return counts, parse_legacy_total(row), raw
 
 
 def _print_table(rows: list[tuple[str, str, int]], *, json_out: bool) -> None:
@@ -401,7 +435,7 @@ Examples:
     index_path = _resolve_index_path(args.write_index) if write_requested else None
 
     try:
-        counts, _raw = fetch_counts()
+        counts, legacy_total, _raw = fetch_counts()
     except (urllib.error.HTTPError, urllib.error.URLError, RuntimeError, json.JSONDecodeError, KeyError, ValueError) as e:
         sys.stderr.write(f"{e}\n")
         return 1
@@ -424,7 +458,9 @@ Examples:
             return 1
         html_text = index_path.read_text(encoding="utf-8")
         try:
-            new_html, log_lines = patch_index_html(html_text, counts, dry_run=args.dry_run)
+            new_html, log_lines = patch_index_html(
+                html_text, counts, dry_run=args.dry_run, legacy_total=legacy_total
+            )
         except ValueError as e:
             sys.stderr.write(f"{e}\n")
             return 1
