@@ -174,9 +174,50 @@ hub doesn't currently provide.
 
 ---
 
-## Clean bill of health
+## Full audit coverage
 
-These checked out as current and correctly linked: GTM Handbook (updated Oct 5), TLDR ICP,
-Business Model Overview, Sales FAQ, Pre-Call Research worksheet (correctly tells AEs to pull live
-rate-card pricing rather than a static doc), Curated Call Library, Agency Whitespace, and the Q4
-media kit.
+I checked every resource and exercise link: **41 Google files** (metadata on all, full content read
+on 6) plus 7 non-Google links (two advertise.tldr.tech pages, two pages.tldr.tech pages, three
+Metabase dashboards — all verified as resolving).
+
+### Stale by their own standards
+
+| Document | Last updated | Note |
+|---|---|---|
+| Deal Post Mortem | **May 4** | Serves as both a Resource *and* the Week 1 Win/Loss exercise |
+| Pod R&R Explainer | **May 4** | AE/AM pod roles — likely to change with the rebuild |
+| Cowork Sales Setup Checklist | **May 5** | A PDF cheatsheet. Given we just found a dead slash command, assume its command list is wrong |
+| Multi-threading + AM Transitions | **May 8** | |
+| Measurement Discovery + Last Click | **May 8** | |
+| Objection Handling Playbook | **May 11** | Past its own 3-month validation cadence |
+| Discovery Call Playbook | **May 11** | Titled "(May26)" |
+| Sales Motion Training | **May 19** | Titled **"_POV_Q226"** — a Q2 deck. This is Marpo's SME deck and the Week 1 Thursday pre-read |
+| Self-Review Template | **May 22** | |
+| Persona Demo Instructions | **May 22** | |
+| Measuring Newsletter Success | **Jul 8** (titled May26) | |
+| Flex Placements Guide | Jul 8 | |
+| Outbound Playbook | **Apr 28** | See below — two problems |
+| Content Studio Overview | Sep 15 (titled **JUNE26**) | Content is current; the title isn't |
+
+### Current and healthy
+
+GTM Handbook (Oct 5) · AE Unscheduled Media Tracker (Oct 9) · Tier S-A Agency Account Mapper
+(Aug 31, Dan's) · Objection Gauntlet (Aug 28) · Agency Book Scoring (Aug 28) · Sales Call Library
+(Jul 9) · AE→AM Handoff (Jul 10) · Career Ladder (Jul 9) · Mock Pitch (Jul 14) · TLDR ICP ·
+Business Model Overview · Sales FAQ · Compass Wiki · Pre-Call Research · Q4 Media Kit
+
+### G. The Outbound Playbook has two problems
+
+Owner val@, **last updated Apr 28** — nearly six months.
+
+1. It says plainly: *"This playbook gives the TLDR **marketing team** a ready-to-deploy outbound
+   system. AEs can reference it for their own prospecting, but the primary audience is the team
+   running scalable outbound motion."* The hub files it under Sales Playbooks as AE material.
+2. Two LinkedIn templates in it tell AEs to write **"7M+ technical buyers"**. We now say 8M+.
+   That is a stale number sitting inside copy a new AE would send to a prospect.
+
+### H. "Sales Motion Training" is a Q2 deck
+
+`Training: Sales Motion Onboarding_POV_Q226`, last touched May 19. It's Marpo's SME deck and the
+Week 1 Thursday async pre-read before his live session. Two quarters old, and it predates both
+the Q4 kit and the Sept 15 discount change.
