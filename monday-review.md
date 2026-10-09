@@ -40,11 +40,12 @@ Is one coming, should the hub point elsewhere, or should it come out until there
 Currently **AvePoint Q3 2026** (Jul 20). Newer: **Coder** (Sep 16), **Parloa**, **Guru**, **AMD**
 (all Aug). None are Q4 yet. Which is the best *teaching* example? I'd suggest Coder or AMD.
 
-### Q5. Objection exercise — 8 or 11?
+### Q5. Objection exercise — ~~8 or 11?~~ RESOLVED
 
-The hub says "all 11 objection categories." The worksheet an AE opens is headed **"The 8
-Objections"** with 8 slots. The 8 are deliberately the top 8 by call volume from the playbook's 11,
-so the design is fine and the hub text is wrong. Revert the hub to 8?
+~~The hub says "all 11 objection categories."~~ **Fixed Oct 9.** The worksheet is headed "The 8
+Objections" with 8 slots — deliberately the top 8 by call volume from the playbook's 11. The hub
+now asks for the worksheet's 8 and points at the full 11-category playbook as the after-session
+read. No discussion needed.
 
 ### Q6. Who owns the Sales Playbooks now?
 
@@ -159,8 +160,8 @@ auth, which means moving the hub behind SSO. Worth it for Rachael's cohort?
 - [ ] **Win/Loss Deal Summaries** *(Week 1)* ⚠️ May 4, and it's the same document as the
       Deal Post Mortem resource
 - [ ] **HubSpot Tool Exercise** *(Week 2)* ⚠️ May 12
-- [ ] **Objection Handling** *(Week 2)* ❌ hub says "all 11 categories", the worksheet has **8**
-      *(see Q5)*
+- [x] **Objection Handling** *(Week 2)* ✅ fixed Oct 9 — hub now asks for the worksheet's **8**,
+      with the 11-category playbook as the after-session read
 - [ ] **Book Grading** *(Week 2)* ❌ the worksheet is still titled **"Book Grading & Sequence
       Building Exercise"** and **Part 2 is entirely Amplemarket** — build sequences there, log to
       the Amplemarket tracker, activate there. We removed Amplemarket from the hub in August and
