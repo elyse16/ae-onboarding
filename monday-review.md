@@ -20,7 +20,8 @@ deal is $25K and 2+ placements."
 
 - Is **$25K ACV and 2+ placements** still the Q4 target?
 - Teach the waterfall, or keep pricing out of onboarding? A new AE hits hold-at-list in week one.
-- Related: the Objection Handling playbook actively teaches the *old* model (see R-16).
+- Related: the Objection Handling playbook actively teaches the *old* model (see Resources →
+  Sales Playbooks).
 
 ### Q2. Is the Sales Playbook still the motion?
 
