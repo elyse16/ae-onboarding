@@ -1,5 +1,7 @@
 # Sales Onboarding Hub
 
+> **Retired Nov 15, 2026.** The live site is now a "moved" page that redirects to the AE Launchpad (https://pages.tldr.tech/ae-launchpad). Make onboarding changes there, not here. The old hub's content stays in git history.
+
 Static site for the TLDR sales onboarding hub (schedule, reference data, resources, exercises, SMEs).
 
 ## Repository
